@@ -23,6 +23,8 @@
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#clinicModal">
                     <i class="fas fa-hospital"></i> Select Clinic
                 </button>
+                <!-- Display selected clinic name -->
+                <h4 id="selectedClinicName"></h4>
             </div>
             <div class="col-md-4 text-right">
                 <!-- Button to add product -->
@@ -43,29 +45,30 @@
                     <th>Category</th>
                     <th>Price</th>
                     <th>Created At</th>
+                    <th>Clinic</th> <!-- Added Clinic column header -->
                     <th>Action</th>
                     <th>Expiration</th>
-                    <th>Clinic</th> <!-- New column for clinic name -->
                 </tr>
             </thead>
+            
             <tbody>
+                <!-- Inventory items will be listed here -->
                 @foreach($inventoryItems as $item)
-                <tr>
+                <tr data-clinic-id="{{ $item->clinic_id }}">
                     <td>{{ $item->name }}</td>
                     <td>{{ $item->description }}</td>
                     <td>{{ $item->quantity }}</td>
-                    <td><img src="{{ asset('images/'.$item->image) }}" alt="Image"></td>
+                    <td><img src="{{ asset('images/' . $item->image) }}" alt="{{ $item->name }}" style="max-width: 100px;"></td>
                     <td>{{ $item->category }}</td>
                     <td>{{ $item->price }}</td>
                     <td>{{ $item->created_at }}</td>
-                    <td>
-                        <!-- Add action buttons here, such as edit, delete, etc. -->
-                    </td>
+                    <td>{{ $item->clinic->name }}</td> <!-- Display clinic name -->
+                    <td>Action buttons here</td>
                     <td>{{ $item->expiration }}</td>
-                    <td class="clinic-name"></td> <!-- Display clinic name here -->
                 </tr>
                 @endforeach
             </tbody>
+            
         </table>
     </div>
 
@@ -82,7 +85,7 @@
                 <div class="modal-body">
                     <ul class="list-group">
                         @foreach($clinics as $clinic)
-                        <li class="list-group-item clinic-option" data-clinic-id="{{ $clinic->id }}">{{ $clinic->name }}</li>
+                        <li class="list-group-item clinic-item" data-clinic-id="{{ $clinic->id }}">{{ $clinic->name }}</li>
                         @endforeach
                     </ul>
                 </div>
@@ -106,7 +109,48 @@
                 <div class="modal-body">
                     <form method="POST" action="{{ route('inventory.store') }}" enctype="multipart/form-data">
                         @csrf
-                        <!-- Form fields for adding a product -->
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="image">Image</label>
+                            <input type="file" class="form-control-file" id="image" name="image" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <input type="text" class="form-control" id="category" name="category" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Price</label>
+                            <input type="number" class="form-control" id="price" name="price" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="created_at">Created At</label>
+                            <input type="datetime-local" class="form-control" id="created_at" name="created_at" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expiration">Expiration</label>
+                            <input type="date" class="form-control" id="expiration" name="expiration" required>
+                        </div>
+                        <!-- Dropdown button for selecting clinic -->
+                        <div class="form-group">
+                            <label for="clinic">Clinic</label>
+                            <select class="form-control" id="clinic" name="clinic_id" required>
+                                @foreach($clinics as $clinic)
+                                <option value="{{ $clinic->id }}">{{ $clinic->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Product</button>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -124,14 +168,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
     <!-- Custom JS -->
     <script>
-        // Custom JavaScript
-        $(document).ready(function() {
-            // Handle clinic selection
-            $('.clinic-option').click(function() {
-                var clinicName = $(this).text();
-                $('.clinic-name').text(clinicName);
+        $(document).ready(function () {
+            // Handler for clinic selection
+            $(".clinic-item").click(function () {
+                var clinicId = $(this).data('clinic-id');
+                $("#selectedClinicName").text($(this).text());
+                filterInventoryByClinic(clinicId);
                 $('#clinicModal').modal('hide');
             });
+            
+            // Function to filter inventory items by clinic
+            function filterInventoryByClinic(clinicId) {
+                // Hide all inventory items
+                $('tbody tr').hide();
+                
+                // Show only inventory items for the selected clinic
+                $('tbody tr[data-clinic-id="' + clinicId + '"]').show();
+            }
         });
     </script>
 </body>
