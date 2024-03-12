@@ -11,7 +11,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\UserManagementController;
-
+use App\Http\Controllers\InventoryController;
 
 
 /*
@@ -136,3 +136,8 @@ Route::prefix('superadmin')->group(function () {
     Route::delete('/superadmin/user/{id}/archive', [UserManagementController::class, 'archive'])->name('superadmin.user.archive');
 
 });
+
+
+//inventory routes
+Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');

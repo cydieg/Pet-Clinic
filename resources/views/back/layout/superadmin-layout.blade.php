@@ -470,13 +470,20 @@
 									<a href="{{ route('superadmin.user.index') }}">Manage Users</a>
 						</li>
 						</ul>
+						<li class="dropdown">
+							<a href="{{ route('inventory.index') }}" class="dropdown-toggle no-arrow">
+								<span class="micon bi bi-bar-chart"></span>
+								<span class="mtext">Inventory</span>
+							</a>
+						</li>
 
 						<li class="dropdown">
 							<a href="javascript:;" class="dropdown-toggle no-arrow">
 								<span class="micon bi bi-bar-chart"></span>
 								<span class="mtext">Reports</span>
 							</a>
-						</li>		
+						</li>
+								
                        
 					
                         <li class="dropdown">
