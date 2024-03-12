@@ -141,3 +141,8 @@ Route::prefix('superadmin')->group(function () {
 //inventory routes
 Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
 Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
+Route::get('/inventory/{id}/audit', 'App\Http\Controllers\InventoryController@showAudit')->name('inventory.audit.show');
+Route::post('/inventory/addquantity/{id}', [InventoryController::class, 'addQuantity'])->name('inventory.addquantity');
+
+
+

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Inventory;
 use App\Models\Clinic;
+use App\Models\Audit;
 
 class InventoryController extends Controller
 {
@@ -16,42 +17,73 @@ class InventoryController extends Controller
     }
 
     public function store(Request $request)
-{
-    // Validation rules for the form inputs
-    $request->validate([
-        'name' => 'required',
-        'description' => 'required',
-        'quantity' => 'required|numeric',
-        'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'category' => 'required',
-        'price' => 'required|numeric',
-        'created_at' => 'required|date',
-        'expiration' => 'required|date',
-        'clinic_id' => 'required|exists:clinics,id'
-    ]);
+    {
+        // Validation rules for the form inputs
+        $request->validate([
+            // Your validation rules...
+        ]);
 
-    // Handle file upload
-    $imageName = time().'.'.$request->image->extension();
-    $request->image->move(public_path('images'), $imageName);
+        // Handle file upload...
 
-    // Generate UPC (Example: Concatenating current timestamp with a random number)
-    $upc = time() . rand(1000, 9999);
+        // Create new inventory item...
+        
+        // Create audit record for addition of the inventory item
+        $inventory = Inventory::create([
+            'upc' => $upc,
+            'name' => $request->name,
+            'description' => $request->description,
+            'quantity' => $request->quantity,
+            'image' => $imageName,
+            'category' => $request->category,
+            'price' => $request->price,
+            'created_at' => $request->created_at,
+            'expiration' => $request->expiration,
+            'clinic_id' => $request->clinic_id
+        ]);
 
-    // Create new inventory item with UPC
-    Inventory::create([
-        'upc' => $upc,
-        'name' => $request->name,
-        'description' => $request->description,
-        'quantity' => $request->quantity,
-        'image' => $imageName,
-        'category' => $request->category,
-        'price' => $request->price,
-        'created_at' => $request->created_at,
-        'expiration' => $request->expiration,
-        'clinic_id' => $request->clinic_id
-    ]);
+        Audit::create([
+            'inventory_id' => $inventory->id,
+            'upc' => $upc,
+            'name' => $request->name,
+            'description' => $request->description,
+            'old_quantity' => 0, // Initial quantity is 0
+            'quantity' => $request->quantity,
+            'type' => 'inbound', // Type is inbound for addition
+        ]);
 
-    return redirect()->route('inventory.index')->with('success', 'Product added successfully.');
-}
+        return redirect()->route('inventory.index')->with('success', 'Product added successfully.');
+    }
 
+    public function showAudit($id)
+    {
+        $inventory = Inventory::findOrFail($id);
+        $audits = Audit::where('inventory_id', $inventory->id)->get();
+
+        return view('inventory.auditindex', compact('inventory', 'audits'));
+    }
+
+    public function addQuantity(Request $request, $id)
+    {
+        $inventory = Inventory::findOrFail($id);
+
+        // Validation rules for adding quantity...
+
+        // Update the quantity of the inventory item...
+
+        $inventory->quantity += $request->quantity;
+        $inventory->save();
+
+        // Create audit record for addition of quantity
+        Audit::create([
+            'inventory_id' => $inventory->id,
+            'upc' => $inventory->upc,
+            'name' => $inventory->name,
+            'description' => $inventory->description,
+            'old_quantity' => $inventory->quantity - $request->quantity,
+            'quantity' => $request->quantity,
+            'type' => 'inbound', // Type is inbound for addition
+        ]);
+
+        return redirect()->back()->with('success', 'Quantity added successfully.');
+    }
 }

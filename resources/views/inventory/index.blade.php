@@ -34,43 +34,47 @@
             </div>
         </div>
 
-        <!-- Inventory table -->
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Quantity</th>
-                    <th>Image</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Created At</th>
-                    <th>Clinic</th> <!-- Added Clinic column header -->
-                    <th>Action</th>
-                    <th>Expiration</th>
-                </tr>
-            </thead>
-            
-            <tbody>
-                <!-- Inventory items will be listed here -->
-                @foreach($inventoryItems as $item)
-                <tr data-clinic-id="{{ $item->clinic_id }}">
-                    <td>{{ $item->name }}</td>
-                    <td>{{ $item->description }}</td>
-                    <td>{{ $item->quantity }}</td>
-                    <td><img src="{{ asset('images/' . $item->image) }}" alt="{{ $item->name }}" style="max-width: 100px;"></td>
-                    <td>{{ $item->category }}</td>
-                    <td>{{ $item->price }}</td>
-                    <td>{{ $item->created_at }}</td>
-                    <td>{{ $item->clinic->name }}</td> <!-- Display clinic name -->
-                    <td>Action buttons here</td>
-                    <td>{{ $item->expiration }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-            
-        </table>
-    </div>
+       <!-- Inventory table -->
+       <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Image</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Created At</th>
+                <th>Clinic</th>
+                <th>Action</th>
+                <th>Expiration</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Inventory items will be listed here -->
+            @foreach($inventoryItems as $item)
+            <tr data-clinic-id="{{ $item->clinic_id }}">
+                <td>{{ $item->name }}</td>
+                <td>{{ $item->description }}</td>
+                <td>{{ $item->quantity }}</td>
+                <td><img src="{{ asset('images/' . $item->image) }}" alt="{{ $item->name }}" style="max-width: 100px;"></td>
+                <td>{{ $item->category }}</td>
+                <td>{{ $item->price }}</td>
+                <td>{{ $item->created_at }}</td>
+                <td>{{ $item->clinic->name }}</td>
+                <td>
+                    <!-- Update action to redirect to audit page -->
+                    <a href="{{ route('inventory.audit.show', ['id' => $item->id]) }}" class="btn btn-primary">Audit</a>
+                    <!-- Button to trigger quantity modal -->
+                    <button type="button" class="btn btn-success add-quantity-btn" data-toggle="modal" data-target="#addQuantityModal" data-item-id="{{ $item->id }}">Add Quantity</button>
+                </td>
+                
+                <td>{{ $item->expiration }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    
 
     <!-- Clinic Selection Modal -->
     <div class="modal fade" id="clinicModal" tabindex="-1" aria-labelledby="clinicModalLabel" aria-hidden="true">
@@ -159,7 +163,35 @@
             </div>
         </div>
     </div>
+    <!-- Add Quantity Modal -->
+    <!-- Add Quantity Modal -->
+<div class="modal fade" id="addQuantityModal" tabindex="-1" aria-labelledby="addQuantityModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addQuantityModalLabel">Add Quantity to Inventory</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addQuantityForm" method="POST" action="{{ route('inventory.addquantity', ['id' => ':id']) }}">
+                    @csrf
+                    <div class="form-group">
+                        <label for="quantity">Quantity to Add</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Quantity</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+    
     <!-- Bootstrap JS and jQuery -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
@@ -176,15 +208,26 @@
                 filterInventoryByClinic(clinicId);
                 $('#clinicModal').modal('hide');
             });
-            
+
             // Function to filter inventory items by clinic
             function filterInventoryByClinic(clinicId) {
                 // Hide all inventory items
                 $('tbody tr').hide();
-                
+
                 // Show only inventory items for the selected clinic
                 $('tbody tr[data-clinic-id="' + clinicId + '"]').show();
             }
+
+            // Handler for clicking Add Quantity button
+            $(".add-quantity-btn").click(function () {
+                // Retrieve the item ID from the button data attribute
+                var itemId = $(this).data('item-id');
+
+                // Set the form action dynamically to include the item ID
+                var formAction = "{{ route('inventory.addquantity', ['id' => ':id']) }}";
+                formAction = formAction.replace(':id', itemId);
+                $("#addQuantityForm").attr('action', formAction);
+            });
         });
     </script>
 </body>
