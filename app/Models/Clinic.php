@@ -28,4 +28,9 @@ class Clinic extends Model
     {
         return $this->hasMany(Appointment::class, 'user_id');
     }
+    public function inventories()
+    {
+        return $this->hasMany(Inventory::class);
+    }
+    
 }

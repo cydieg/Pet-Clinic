@@ -4,15 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Inventory;
+use App\Models\Clinic;
 
 class InventoryController extends Controller
 {
     public function index()
     {
-        $inventoryItems = Inventory::all();
-        return view('inventory.index', compact('inventoryItems'));
+        $clinics = Clinic::all(); // Assuming you're retrieving all clinics from the database
+        $inventoryItems = Inventory::all(); // Assuming you're retrieving all inventory items from the database
+        return view('inventory.index', compact('clinics', 'inventoryItems'));
     }
-
     public function store(Request $request)
     {
         $request->validate([

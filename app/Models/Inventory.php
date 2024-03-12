@@ -19,8 +19,11 @@ class Inventory extends Model
         'upc',
         'created_at',
         'expiration',
-        
+        'clinic_id', // Add the foreign key for the clinic
     ];
 
-    
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class);
+    }
 }

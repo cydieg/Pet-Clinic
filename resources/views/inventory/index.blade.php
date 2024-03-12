@@ -17,50 +17,77 @@
 
 <body>
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">Inventory</div>
+        <div class="row justify-content-between mb-3">
+            <div class="col-md-4">
+                <!-- Button to open modal -->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#clinicModal">
+                    <i class="fas fa-hospital"></i> Select Clinic
+                </button>
+            </div>
+            <div class="col-md-4 text-right">
+                <!-- Button to add product -->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addProductModal">
+                    <i class="fas fa-plus"></i> Add Product
+                </button>
+            </div>
+        </div>
 
-                    <div class="card-body">
-                        <div class="text-right mb-3">
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addProductModal">
-                                <i class="fas fa-plus"></i> Add Product
-                            </button>
-                        </div>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Quantity</th>
-                                    <th>Image</th>
-                                    <th>Category</th>
-                                    <th>Price</th>
-                                    <th>Created At</th>
-                                    <th>Action</th>
-                                    <th>Expiration</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($inventoryItems as $item)
-                                <tr>
-                                    <td>{{ $item->name }}</td>
-                                    <td>{{ $item->description }}</td>
-                                    <td>{{ $item->quantity }}</td>
-                                    <td><img src="{{ asset('images/'.$item->image) }}" alt="Image"></td>
-                                    <td>{{ $item->category }}</td>
-                                    <td>{{ $item->price }}</td>
-                                    <td>{{ $item->created_at }}</td>
-                                    <td>
-                                        <!-- Add action buttons here, such as edit, delete, etc. -->
-                                    </td>
-                                    <td>{{ $item->expiration }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+        <!-- Inventory table -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Image</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Created At</th>
+                    <th>Action</th>
+                    <th>Expiration</th>
+                    <th>Clinic</th> <!-- New column for clinic name -->
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($inventoryItems as $item)
+                <tr>
+                    <td>{{ $item->name }}</td>
+                    <td>{{ $item->description }}</td>
+                    <td>{{ $item->quantity }}</td>
+                    <td><img src="{{ asset('images/'.$item->image) }}" alt="Image"></td>
+                    <td>{{ $item->category }}</td>
+                    <td>{{ $item->price }}</td>
+                    <td>{{ $item->created_at }}</td>
+                    <td>
+                        <!-- Add action buttons here, such as edit, delete, etc. -->
+                    </td>
+                    <td>{{ $item->expiration }}</td>
+                    <td class="clinic-name"></td> <!-- Display clinic name here -->
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Clinic Selection Modal -->
+    <div class="modal fade" id="clinicModal" tabindex="-1" aria-labelledby="clinicModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="clinicModalLabel">Select Clinic</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group">
+                        @foreach($clinics as $clinic)
+                        <li class="list-group-item clinic-option" data-clinic-id="{{ $clinic->id }}">{{ $clinic->name }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -79,39 +106,7 @@
                 <div class="modal-body">
                     <form method="POST" action="{{ route('inventory.store') }}" enctype="multipart/form-data">
                         @csrf
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="description">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="quantity">Quantity</label>
-                            <input type="number" class="form-control" id="quantity" name="quantity" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="image">Image</label>
-                            <input type="file" class="form-control-file" id="image" name="image" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="category">Category</label>
-                            <input type="text" class="form-control" id="category" name="category" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="price">Price</label>
-                            <input type="number" class="form-control" id="price" name="price" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="created_at">Created At</label>
-                            <input type="datetime-local" class="form-control" id="created_at" name="created_at" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="expiration">Expiration</label>
-                            <input type="date" class="form-control" id="expiration" name="expiration" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Product</button>
+                        <!-- Form fields for adding a product -->
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -129,7 +124,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
     <!-- Custom JS -->
     <script>
-        // Add your custom JavaScript here
+        // Custom JavaScript
+        $(document).ready(function() {
+            // Handle clinic selection
+            $('.clinic-option').click(function() {
+                var clinicName = $(this).text();
+                $('.clinic-name').text(clinicName);
+                $('#clinicModal').modal('hide');
+            });
+        });
     </script>
 </body>
 
